@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"regexp"
 	"strings"
 	"sync"
@@ -737,10 +738,16 @@ func (c *Client) tracef(format string, args ...interface{}) {
 
 // dumpRequest dumps the given HTTP request to the trace log.
 func (c *Client) dumpRequest(r *http.Request) {
+	// fmt.Println("os.Getenv(ES_LOG_INFO) = " + os.Getenv("ES_LOG_INFO"))
 	if c.tracelog != nil {
 		out, err := httputil.DumpRequestOut(r, true)
 		if err == nil {
 			c.tracef("%s\n", string(out))
+		}
+	} else if os.Getenv("ES_LOG_INFO") == "1" {
+		out, err := httputil.DumpRequestOut(r, true)
+		if err == nil {
+			os.Stdout.Write(out)
 		}
 	}
 }
@@ -751,6 +758,11 @@ func (c *Client) dumpResponse(resp *http.Response) {
 		out, err := httputil.DumpResponse(resp, true)
 		if err == nil {
 			c.tracef("%s\n", string(out))
+		}
+	} else if os.Getenv("ES_LOG_RES") == "1" {
+		out, err := httputil.DumpResponse(resp, true)
+		if err == nil {
+			os.Stdout.Write(out)
 		}
 	}
 }
